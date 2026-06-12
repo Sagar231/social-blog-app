@@ -21,6 +21,20 @@ function Protected({ children }) {
 export default function App() {
   const { user, loading } = useAuth();
 
+  // Wait for auth restoration before rendering any page, so the first data
+  // fetch carries the access token (otherwise it's an anonymous request and
+  // per-user state like "is_liked" comes back wrong).
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary">
+        <Navbar />
+        <div className="grid place-items-center py-32">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent-pink" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       <Navbar />

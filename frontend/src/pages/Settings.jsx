@@ -25,8 +25,17 @@ export default function Settings() {
       await api.patch("/users/me", form);
       await refreshUser();
       notify("Profile updated", "success");
-    } catch {
-      notify("Couldn't update profile", "error");
+    } catch (err) {
+      const data = err.response?.data;
+      // Surface the real validation message (e.g. "Enter a valid URL.").
+      const msg = data
+        ? Object.entries(data)
+            .map(([field, errs]) =>
+              `${field}: ${Array.isArray(errs) ? errs.join(" ") : errs}`
+            )
+            .join("  ")
+        : "Couldn't update profile";
+      notify(msg, "error");
     } finally {
       setBusy(false);
     }

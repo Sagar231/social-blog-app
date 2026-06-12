@@ -16,6 +16,15 @@ from .serializers import (
 )
 
 
+def invalidate_post_cache(slug):
+    """Clear all per-user cached copies of a post detail. No-op on cache
+    backends without pattern deletion (e.g. local-memory used in tests)."""
+    try:
+        cache.delete_pattern(f"post_detail:{slug}:*")
+    except (AttributeError, NotImplementedError):
+        pass
+
+
 class IsAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
@@ -64,7 +73,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save()
-        cache.delete_pattern(f"post_detail:{serializer.instance.slug}:*")
+        invalidate_post_cache(serializer.instance.slug)
 
     @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, slug=None):
@@ -79,6 +88,7 @@ class PostViewSet(viewsets.ModelViewSet):
             Post.objects.filter(pk=post.pk).update(like_count=F("like_count") - 1)
             liked = False
         post.refresh_from_db(fields=["like_count"])
+        invalidate_post_cache(post.slug)
         return Response({"liked": liked, "like_count": post.like_count})
 
     @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
@@ -87,6 +97,7 @@ class PostViewSet(viewsets.ModelViewSet):
         bm, created = Bookmark.objects.get_or_create(user=request.user, post=post)
         if not created:
             bm.delete()
+        invalidate_post_cache(post.slug)
         return Response({"bookmarked": created})
 
 
