@@ -70,28 +70,62 @@ export function useDeletePost() {
   });
 }
 
-// Optimistic like toggle. Updates any cached list pages + detail.
+// List query keys whose cached pages contain posts we may need to update.
+const LIST_ENDPOINTS = ["/feed", "/posts"];
+
+// Apply `updater` to a post (matched by slug) everywhere it's cached:
+// the post-detail query AND every infinite list page (feed, explore, profile).
+function patchPostEverywhere(qc, slug, updater) {
+  qc.setQueryData(["post", slug], (old) => (old ? updater(old) : old));
+
+  qc.setQueriesData(
+    {
+      predicate: (q) =>
+        Array.isArray(q.queryKey) && LIST_ENDPOINTS.includes(q.queryKey[0]),
+    },
+    (old) => {
+      if (!old?.pages) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page) => ({
+          ...page,
+          results: page.results.map((p) =>
+            p.slug === slug ? updater(p) : p
+          ),
+        })),
+      };
+    }
+  );
+}
+
+const toggleLike = (p) => ({
+  ...p,
+  is_liked: !p.is_liked,
+  like_count: p.like_count + (p.is_liked ? -1 : 1),
+});
+
+// Optimistic like toggle. Updates detail + every list cache immediately,
+// then reconciles with the server's authoritative count.
 export function useLike() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (slug) => api.post(`/posts/${slug}/like`).then((r) => r.data),
     onMutate: async (slug) => {
       await qc.cancelQueries({ queryKey: ["post", slug] });
-      const prev = qc.getQueryData(["post", slug]);
-      if (prev) {
-        qc.setQueryData(["post", slug], {
-          ...prev,
-          is_liked: !prev.is_liked,
-          like_count: prev.like_count + (prev.is_liked ? -1 : 1),
-        });
-      }
-      return { prev, slug };
+      patchPostEverywhere(qc, slug, toggleLike);
+      return { slug };
     },
-    onError: (_e, _slug, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["post", ctx.slug], ctx.prev);
+    onSuccess: (data, slug) => {
+      // data = { liked, like_count } from the server — set exact truth.
+      patchPostEverywhere(qc, slug, (p) => ({
+        ...p,
+        is_liked: data.liked,
+        like_count: data.like_count,
+      }));
     },
-    onSettled: (_d, _e, slug) => {
-      qc.invalidateQueries({ queryKey: ["post", slug] });
+    onError: (_e, slug) => {
+      // Revert the optimistic toggle.
+      patchPostEverywhere(qc, slug, toggleLike);
     },
   });
 }
