@@ -4,7 +4,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.notifications.tasks import notify
+from apps.notifications.tasks import create_notification
 from apps.posts.models import Post
 from apps.posts.serializers import PostListSerializer
 
@@ -31,7 +31,7 @@ class FollowToggleView(APIView):
             User.objects.filter(pk=request.user.pk).update(
                 following_count=F("following_count") + 1
             )
-            notify.delay(target.id, request.user.id, "follow", None)
+            create_notification(target.id, request.user.id, "follow", None)
             following = True
         else:
             follow.delete()

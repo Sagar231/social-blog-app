@@ -4,7 +4,7 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.notifications.tasks import notify
+from apps.notifications.tasks import create_notification
 from apps.social.models import Bookmark, Like
 
 from .filters import PostFilter
@@ -81,7 +81,7 @@ class PostViewSet(viewsets.ModelViewSet):
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
             Post.objects.filter(pk=post.pk).update(like_count=F("like_count") + 1)
-            notify.delay(post.author_id, request.user.id, "like", post.id)
+            create_notification(post.author_id, request.user.id, "like", post.id)
             liked = True
         else:
             like.delete()
@@ -120,7 +120,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
         comment = serializer.save(author=self.request.user, post=post)
         Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
         if post.author_id != self.request.user.id:
-            notify.delay(post.author_id, self.request.user.id, "comment", post.id)
+            create_notification(
+                post.author_id, self.request.user.id, "comment", post.id
+            )
 
 
 class FeedView(generics.ListAPIView):

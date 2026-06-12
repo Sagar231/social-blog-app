@@ -5,9 +5,17 @@ import remarkGfm from "remark-gfm";
 export default function MarkdownEditor({ value, onChange }) {
   const [tab, setTab] = useState("write");
 
+  const insertImage = () => {
+    const url = window.prompt("Paste the image URL (https://…):");
+    if (!url) return;
+    const snippet = `\n![image](${url.trim()})\n`;
+    onChange((value || "") + snippet);
+    setTab("write");
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-bg-surface">
-      <div className="flex border-b border-border">
+      <div className="flex items-center border-b border-border">
         {["write", "preview"].map((t) => (
           <button
             key={t}
@@ -22,6 +30,14 @@ export default function MarkdownEditor({ value, onChange }) {
             {t}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={insertImage}
+          className="focus-ring ml-auto mr-2 rounded-xl px-3 py-1.5 text-sm text-text-muted hover:text-accent-blue"
+          title="Insert an image by URL"
+        >
+          🖼 Insert image
+        </button>
       </div>
 
       {tab === "write" ? (

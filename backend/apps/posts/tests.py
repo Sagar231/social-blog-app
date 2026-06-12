@@ -43,6 +43,19 @@ def test_like_toggles(auth_client):
 
 
 @pytest.mark.django_db
+def test_like_creates_notification(auth_client):
+    from apps.notifications.models import Notification
+
+    client, liker = auth_client
+    author = User.objects.create_user("author2", password="x12345678")
+    post = Post.objects.create(author=author, title="T2", body="b")
+    client.post(f"/api/posts/{post.slug}/like")
+    note = Notification.objects.filter(recipient=author, verb="like").first()
+    assert note is not None
+    assert note.actor_id == liker.id
+
+
+@pytest.mark.django_db
 def test_drafts_hidden_from_others():
     author = User.objects.create_user("author", password="x12345678")
     Post.objects.create(author=author, title="Secret", body="b", status="draft")

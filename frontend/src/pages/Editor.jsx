@@ -15,6 +15,7 @@ export default function Editor() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [tags, setTags] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [status, setStatus] = useState("published");
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function Editor() {
       setTitle(existing.title);
       setBody(existing.body);
       setTags(existing.tags.map((t) => t.name).join(", "));
+      setCoverUrl(existing.cover_image_url || "");
       setStatus(existing.status);
     }
   }, [existing]);
@@ -32,6 +34,7 @@ export default function Editor() {
       title,
       body,
       status: publishStatus,
+      cover_image_url: coverUrl.trim(),
       tag_names: tags
         .split(",")
         .map((t) => t.trim())
@@ -68,6 +71,24 @@ export default function Editor() {
         placeholder="Tags, comma separated (e.g. react, design)"
         className="mb-4 w-full rounded-2xl border border-border bg-bg-surface px-4 py-2.5 text-sm outline-none focus:border-accent-pink"
       />
+
+      <div className="mb-4">
+        <input
+          value={coverUrl}
+          onChange={(e) => setCoverUrl(e.target.value)}
+          placeholder="Cover image URL (paste a public image link, e.g. https://…/photo.jpg)"
+          className="w-full rounded-2xl border border-border bg-bg-surface px-4 py-2.5 text-sm outline-none focus:border-accent-pink"
+        />
+        {coverUrl.trim() && (
+          <img
+            src={coverUrl}
+            alt="cover preview"
+            className="mt-3 max-h-52 w-full rounded-xl object-cover"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+            onLoad={(e) => (e.currentTarget.style.display = "block")}
+          />
+        )}
+      </div>
 
       <MarkdownEditor value={body} onChange={setBody} />
 
