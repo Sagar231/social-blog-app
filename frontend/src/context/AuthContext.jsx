@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   api,
   getRefreshToken,
@@ -9,6 +10,7 @@ import {
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const qc = useQueryClient();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,12 +40,17 @@ export function AuthProvider({ children }) {
       setLoading(false);
     })();
 
-    const onLogout = () => setUser(null);
+    const onLogout = () => {
+      setUser(null);
+      qc.clear();
+    };
     window.addEventListener("auth:logout", onLogout);
     return () => window.removeEventListener("auth:logout", onLogout);
-  }, [loadMe]);
+  }, [loadMe, qc]);
 
   const login = async (username, password) => {
+    // Drop any previous user's cached data before loading this account.
+    qc.clear();
     const { data } = await api.post("/auth/login", { username, password });
     setAccessToken(data.access);
     setRefreshToken(data.refresh);
@@ -60,6 +67,7 @@ export function AuthProvider({ children }) {
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
+    qc.clear();
   };
 
   return (
