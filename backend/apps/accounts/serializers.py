@@ -10,7 +10,7 @@ class UserMiniSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username", "avatar", "bio")
+        fields = ("id", "username", "avatar", "avatar_url", "bio")
         read_only_fields = fields
 
 
@@ -27,7 +27,9 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "bio",
             "avatar",
+            "avatar_url",
             "banner",
+            "banner_url",
             "follower_count",
             "following_count",
             "is_following",

@@ -26,8 +26,12 @@ export default function Profile() {
         <div
           className="h-28 bg-brand-gradient"
           style={
-            profile.banner
-              ? { backgroundImage: `url(${profile.banner})`, backgroundSize: "cover" }
+            profile.banner_url || profile.banner
+              ? {
+                  backgroundImage: `url(${profile.banner_url || profile.banner})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
               : undefined
           }
         />

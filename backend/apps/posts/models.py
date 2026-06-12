@@ -29,6 +29,7 @@ class Post(models.Model):
     slug = models.SlugField(max_length=240, unique=True, blank=True)
     body = models.TextField(help_text="Markdown content")
     cover_image = models.ImageField(upload_to="covers/", blank=True, null=True)
+    cover_image_url = models.URLField(blank=True, default="")
     tags = models.ManyToManyField(Tag, related_name="posts", blank=True)
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.PUBLISHED

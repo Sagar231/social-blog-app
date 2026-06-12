@@ -8,6 +8,9 @@ class User(AbstractUser):
     bio = models.TextField(blank=True, max_length=500)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     banner = models.ImageField(upload_to="banners/", blank=True, null=True)
+    # External image URLs (work without media hosting; used as fallback in the UI).
+    avatar_url = models.URLField(blank=True, default="")
+    banner_url = models.URLField(blank=True, default="")
 
     follower_count = models.PositiveIntegerField(default=0)
     following_count = models.PositiveIntegerField(default=0)

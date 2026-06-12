@@ -48,6 +48,7 @@ class PostListSerializer(serializers.ModelSerializer):
             "title",
             "slug",
             "cover_image",
+            "cover_image_url",
             "tags",
             "status",
             "like_count",

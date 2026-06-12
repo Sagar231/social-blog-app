@@ -89,9 +89,9 @@ export default function PostDetail() {
         </div>
       </header>
 
-      {post.cover_image && (
+      {(post.cover_image_url || post.cover_image) && (
         <img
-          src={post.cover_image}
+          src={post.cover_image_url || post.cover_image}
           alt=""
           className="mb-6 max-h-96 w-full rounded-2xl object-cover"
         />

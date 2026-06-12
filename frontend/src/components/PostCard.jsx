@@ -32,9 +32,9 @@ export default function PostCard({ post }) {
       </div>
 
       <Link to={`/posts/${post.slug}`}>
-        {post.cover_image && (
+        {(post.cover_image_url || post.cover_image) && (
           <img
-            src={post.cover_image}
+            src={post.cover_image_url || post.cover_image}
             alt=""
             className="mb-3 max-h-56 w-full rounded-xl object-cover"
           />

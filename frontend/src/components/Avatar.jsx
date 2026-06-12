@@ -1,9 +1,10 @@
 export default function Avatar({ user, size = 40 }) {
   const initial = (user?.username || "?").charAt(0).toUpperCase();
-  if (user?.avatar) {
+  const src = user?.avatar_url || user?.avatar;
+  if (src) {
     return (
       <img
-        src={user.avatar}
+        src={src}
         alt={user.username}
         width={size}
         height={size}
