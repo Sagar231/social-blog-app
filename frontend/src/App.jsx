@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
@@ -36,9 +37,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary">
+    <div className="flex min-h-screen flex-col bg-bg-primary text-text-primary">
       <Navbar />
-      <main className="mx-auto max-w-3xl px-4 pb-20 pt-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-20 pt-6">
         <Routes>
           <Route
             path="/"
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }

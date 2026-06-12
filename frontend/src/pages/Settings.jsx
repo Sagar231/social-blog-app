@@ -99,7 +99,7 @@ export default function Settings() {
               className="rounded-2xl border border-border bg-bg-primary px-3 py-2.5 outline-none focus:border-accent-pink"
             />
             <span className="text-xs text-text-muted">
-              Paste a link to a public image — direct photo upload isn't
+              Paste a link to a public image. Direct photo upload isn't
               available here.
             </span>
           </label>
