@@ -1,13 +1,15 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Avatar from "../components/Avatar.jsx";
 import FollowButton from "../components/FollowButton.jsx";
 import PostFeed from "../components/PostFeed.jsx";
 import { Shimmer } from "../components/Skeleton.jsx";
 import { useProfile } from "../hooks/useUsers.js";
 import { usePostList } from "../hooks/usePosts.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Profile() {
   const { username } = useParams();
+  const { user } = useAuth();
   const { data: profile, isLoading } = useProfile(username);
   const posts = usePostList("/posts", { author: username, ordering: "-created_at" });
 
@@ -40,7 +42,16 @@ export default function Profile() {
             <div className="rounded-full border-4 border-bg-surface">
               <Avatar user={profile} size={72} />
             </div>
-            <FollowButton profile={profile} />
+            {user && user.username === profile.username ? (
+              <Link
+                to="/settings"
+                className="focus-ring rounded-2xl border border-border bg-bg-surface px-4 py-2 text-sm font-semibold hover:bg-bg-elevated"
+              >
+                Edit profile
+              </Link>
+            ) : (
+              <FollowButton profile={profile} />
+            )}
           </div>
           <h1 className="mt-3 font-display text-xl font-bold">
             @{profile.username}

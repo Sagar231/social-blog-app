@@ -122,6 +122,8 @@ export function useLike() {
         is_liked: data.liked,
         like_count: data.like_count,
       }));
+      // Liked posts appear in the Home feed, so refresh it next time it's shown.
+      qc.invalidateQueries({ queryKey: ["/feed"] });
     },
     onError: (_e, slug) => {
       // Revert the optimistic toggle.

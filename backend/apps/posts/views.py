@@ -113,21 +113,28 @@ class CommentListCreateView(generics.ListCreateAPIView):
 
 
 class FeedView(generics.ListAPIView):
-    """Personalized feed: posts from people the user follows + their own."""
+    """Personalized feed: posts from people the user follows, their own posts,
+    and posts they've liked."""
 
     serializer_class = PostListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        from django.db.models import Q
+
         user = self.request.user
         following_ids = list(
             user.following.values_list("following_id", flat=True)
         )
         following_ids.append(user.id)
+        liked_ids = list(user.likes.values_list("post_id", flat=True))
+
         return (
             Post.objects.filter(
-                author_id__in=following_ids, status=Post.Status.PUBLISHED
+                Q(author_id__in=following_ids) | Q(id__in=liked_ids),
+                status=Post.Status.PUBLISHED,
             )
             .select_related("author")
             .prefetch_related("tags")
+            .distinct()
         )

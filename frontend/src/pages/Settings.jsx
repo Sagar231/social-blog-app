@@ -13,6 +13,8 @@ export default function Settings() {
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
     email: user?.email || "",
+    avatar_url: user?.avatar_url || "",
+    banner_url: user?.banner_url || "",
   });
   const [busy, setBusy] = useState(false);
 
@@ -66,6 +68,49 @@ export default function Settings() {
             />
           </label>
         ))}
+        <div className="flex items-center gap-3">
+          <img
+            src={
+              form.avatar_url ||
+              `https://i.pravatar.cc/120?u=${user?.username}`
+            }
+            alt="avatar preview"
+            className="h-14 w-14 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.visibility = "hidden";
+            }}
+          />
+          <label className="flex flex-1 flex-col gap-1 text-sm">
+            <span className="text-text-muted">Profile picture URL</span>
+            <input
+              type="url"
+              value={form.avatar_url}
+              onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+              placeholder="https://…/me.jpg"
+              className="rounded-2xl border border-border bg-bg-primary px-3 py-2.5 outline-none focus:border-accent-pink"
+            />
+            <span className="text-xs text-text-muted">
+              Paste a link to a public image — direct photo upload isn't
+              available here.
+            </span>
+          </label>
+        </div>
+
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-text-muted">Banner image URL</span>
+          <input
+            type="url"
+            value={form.banner_url}
+            onChange={(e) => setForm({ ...form, banner_url: e.target.value })}
+            placeholder="https://…/banner.jpg"
+            className="rounded-2xl border border-border bg-bg-primary px-3 py-2.5 outline-none focus:border-accent-pink"
+          />
+          <span className="text-xs text-text-muted">
+            Paste a public image link (e.g. from Unsplash or Imgur). Direct file
+            uploads aren't supported on this deployment.
+          </span>
+        </label>
+
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-text-muted">Bio</span>
           <textarea
