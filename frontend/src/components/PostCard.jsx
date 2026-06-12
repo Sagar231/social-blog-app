@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import Avatar from "./Avatar.jsx";
 import LikeButton from "./LikeButton.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useToast } from "../context/ToastContext.jsx";
+import { useDeletePost } from "../hooks/usePosts.js";
 
 function timeAgo(iso) {
   const d = (Date.now() - new Date(iso)) / 1000;
@@ -11,6 +14,19 @@ function timeAgo(iso) {
 }
 
 export default function PostCard({ post }) {
+  const { user } = useAuth();
+  const { notify } = useToast();
+  const del = useDeletePost();
+  const isAuthor = user && user.username === post.author.username;
+
+  const onDelete = () => {
+    if (!confirm(`Delete "${post.title}"? This can't be undone.`)) return;
+    del.mutate(post.slug, {
+      onSuccess: () => notify("Post deleted", "success"),
+      onError: () => notify("Couldn't delete the post", "error"),
+    });
+  };
+
   return (
     <article className="animate-fade-in rounded-2xl border border-border bg-bg-surface p-5 transition hover:shadow-soft">
       <div className="mb-3 flex items-center gap-2.5">
@@ -28,6 +44,25 @@ export default function PostCard({ post }) {
           <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-xs text-accent-blue">
             Draft
           </span>
+        )}
+        {isAuthor && (
+          <div className="ml-auto flex items-center gap-1">
+            <Link
+              to={`/edit/${post.slug}`}
+              aria-label="Edit post"
+              className="focus-ring rounded-lg px-2 py-1 text-xs text-text-muted hover:text-text-primary"
+            >
+              Edit
+            </Link>
+            <button
+              onClick={onDelete}
+              disabled={del.isPending}
+              aria-label="Delete post"
+              className="focus-ring rounded-lg px-2 py-1 text-xs text-text-muted hover:text-accent-red disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
         )}
       </div>
 

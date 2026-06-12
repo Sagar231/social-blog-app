@@ -65,8 +65,14 @@ export function useSavePost() {
 }
 
 export function useDeletePost() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (slug) => api.delete(`/posts/${slug}`),
+    onSuccess: () => {
+      // Drop the post from any feed/explore/profile list it appeared in.
+      qc.invalidateQueries({ queryKey: ["/posts"] });
+      qc.invalidateQueries({ queryKey: ["/feed"] });
+    },
   });
 }
 
